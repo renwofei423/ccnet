@@ -45,6 +45,7 @@ char *peer_name;
 char *peer_id;
 char *host_str;
 char *port_str;
+char *client_port_str;
 
 /* argv0 */
 char *program_name;
@@ -69,13 +70,14 @@ create_peerkey ()
 }
 
 
-static const char *short_opts = "hc:n:a:P:";
+static const char *short_opts = "hc:n:a:P:Q:";
 static const struct option long_opts[] = {
     { "help", no_argument, NULL, 'h' },
     { "config-dir", required_argument, NULL, 'c' },
     { "name", required_argument, NULL, 'n' },
     { "host", required_argument, NULL, 'H' },
     { "port", required_argument, NULL, 'P' },
+    { "client_port", required_argument, NULL, 'Q' },
     { 0, 0, 0, 0 },
 };
 
@@ -101,6 +103,9 @@ void usage (int exit_status)
     fputs (""
 "  -P, --port=port           Public port. Only useful for server.\n"
 "                            Default 10001.\n"
+           , stdout);
+    fputs (""
+"  -Q, --client-port=port    Client port. Only useful for stress test.\n"
            , stdout);
 
     exit (exit_status);
@@ -148,6 +153,9 @@ main(int argc, char **argv)
             break;
         case 'P':
             port_str = strdup (optarg);
+            break;
+        case 'Q':
+            client_port_str = strdup (optarg);
             break;
         default:
             usage(1);
@@ -227,7 +235,10 @@ make_configure_file (const char *config_file)
 
     fprintf (fp, "\n");
     fprintf (fp, "[Client]\n");
-    fprintf (fp, "PORT = 13419\n");
+    if (client_port_str)
+        fprintf (fp, "PORT = %s\n", client_port_str);
+    else
+        fprintf (fp, "PORT = 13419\n");
 
     fclose (fp);
 
