@@ -375,7 +375,8 @@ static void listen_on_localhost (CcnetSession *session)
     if ( (sockfd = ccnet_net_bind_v4 ("127.0.0.1", &session->local_port)) < 0) {
         printf ("listen on localhost failed\n");
         exit (1);
-    } ccnet_message ("Listen on 127.0.0.1 %d\n", session->local_port);
+    }
+    ccnet_message ("Listen on 127.0.0.1 %d\n", session->local_port);
 
     listen (sockfd, 5);
     event_set (&session->local_event, sockfd, EV_READ | EV_PERSIST, 
@@ -388,6 +389,7 @@ ccnet_session_start_network (CcnetSession *session)
 {
     int r;
 
+#ifndef CCNET_SERVER
     r = in_nat ();
     if (r == -1)
         session->base.net_status = NET_STATUS_DOWN;
@@ -395,6 +397,10 @@ ccnet_session_start_network (CcnetSession *session)
         session->base.net_status = NET_STATUS_FULL;
     else
         session->base.net_status = NET_STATUS_INNAT;
+#else
+    r = 0;
+    session->base.net_status = NET_STATUS_FULL;
+#endif
     ccnet_message ("Net status: %s\n", net_status_string(session->base.net_status));
 
     if (session->base.net_status != NET_STATUS_DOWN) {
