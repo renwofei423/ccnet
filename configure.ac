@@ -61,11 +61,16 @@ fi
 
 # test which sub-component to compile
 
+compile_cli=yes
+compile_tools=yes
+compile_server=no
+
 if test "$bwin32" = true; then
    compile_client=yes
    compile_cli=no
    compile_tools=no
    compile_server=no
+
 fi
 
 if test "$bmac" = true; then
@@ -74,36 +79,27 @@ if test "$bmac" = true; then
    compile_tools=no
    compile_server=no
 
-   AC_ARG_ENABLE(server, AC_HELP_STRING([--enable-server], [enable server]),
+fi
+
+#if test "$blinux" = true || test "$bwin32" = true ; then
+AC_ARG_ENABLE(client, AC_HELP_STRING([--enable-client], [enable client]),
+   [compile_client=$enableval],[compile_client="yes"])
+
+if test "$compile_client" = yes; then
+   compile_gui=yes
+fi
+
+
+AC_ARG_ENABLE(server, AC_HELP_STRING([--enable-server], [enable server]),
    [compile_server=$enableval],[compile_server="no"])
 
-fi
+AC_ARG_ENABLE(ldap, AC_HELP_STRING([--enable-ldap], [enable LDAP]),
+   [compile_ldap=$enableval],[compile_ldap="no"])
 
-if test "$blinux" = true; then
-   compile_cli=yes
-   compile_tools=yes
+AC_ARG_ENABLE(cluster, AC_HELP_STRING([--enable-cluster],
+   [enable cluster]), [compile_cluster=$enableval],
+   [compile_cluster="no"])
 
-   compile_server=no
-   
-
-   AC_ARG_ENABLE(client, AC_HELP_STRING([--enable-client], [enable server]),
-      [compile_client=$enableval],[compile_client="yes"])
-
-   if test "$compile_client" = yes; then
-      compile_gui=yes
-   fi
-
-
-   AC_ARG_ENABLE(server, AC_HELP_STRING([--enable-server], [enable server]),
-      [compile_server=$enableval],[compile_server="no"])
-
-   AC_ARG_ENABLE(ldap, AC_HELP_STRING([--enable-ldap], [enable LDAP]),
-      [compile_ldap=$enableval],[compile_ldap="no"])
-
-   AC_ARG_ENABLE(cluster, AC_HELP_STRING([--enable-cluster],
-      [enable cluster]), [compile_cluster=$enableval],
-      [compile_cluster="no"])
-fi
 
 AC_ARG_ENABLE(python,
               AC_HELP_STRING([--enable-python],[build ccnet python binding]),
@@ -292,8 +288,13 @@ if test "${compile_server}" = "yes"; then
    AC_SUBST(ZDB_CFLAGS)
    AC_SUBST(ZDB_LIBS)
 
-   MYSQL_LIBS=`mysql_config --libs_r`
-   MYSQL_CFLAGS=`mysql_config --include`
+   if test "$bwin32" = true; then
+      MYSQL_LIBS=`mysql_config.pl --libs_r`
+      MYSQL_CFLAGS=`mysql_config.pl --include`
+   else
+      MYSQL_LIBS=`mysql_config --libs_r`
+      MYSQL_CFLAGS=`mysql_config --include`
+   fi
 
    # On CentOS, libmysqlclient is in /usr/lib64/mysql/, not /usr/lib, so we
    # need to adjust CPPFLAGS and LDFLAGS before check it
@@ -301,10 +302,11 @@ if test "${compile_server}" = "yes"; then
    saved_LDFLAGS=$LDFLAGS
    CPPFLAGS="$MYSQL_CFLAGS $CPPFLAGS"
    LDFLAGS="$MYSQL_LIBS $LDFLAGS"
-    
+
+   if test "$bwin32" != true; then
    AC_CHECK_LIB(mysqlclient, mysql_init, [echo "found library mysqlclient"],
       AC_MSG_ERROR([*** Unable to find mysql client library]), )
-      
+   fi
    CPPFLAGS=$saved_CPPFLAGS
    LDFLAGS=$saved_LDFLAGS
 

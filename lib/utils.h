@@ -331,6 +331,7 @@ int win32_kill_process (const char *process_name_in);
 int win32_spawn_process (char *cmd, char *wd);
 char *wchar_to_utf8 (const wchar_t *src);
 wchar_t *wchar_from_utf8 (const char *src);
+char **get_argv_utf8 (int *argc);
 #endif
 
 char* ccnet_object_type_from_id (const char *object_id);

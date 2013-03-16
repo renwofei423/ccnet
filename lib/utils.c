@@ -382,7 +382,7 @@ ccnet_expand_path (const char *src)
         struct passwd *pw = NULL;
 
         for ( ; *next_in != '/' && *next_in != '\0'; next_in++) ;
-        
+
         len = next_in - src;
         if (len == 1) {
             pw = getpwuid (geteuid());
@@ -394,7 +394,7 @@ ccnet_expand_path (const char *src)
         }
         if (pw == NULL)
             return NULL;
-       
+
         len = strlen (pw->pw_dir);
         memcpy (new_path, pw->pw_dir, len);
         next_out = new_path + len;
@@ -406,14 +406,14 @@ ccnet_expand_path (const char *src)
         getcwd (new_path, PATH_MAX);
         for ( ; *next_out; next_out++) ; /* to '\0' */
     }
-    
+
     while (*next_in != '\0') {
         /* move ntoken to the next not '/' char  */
         for (ntoken = next_in; *ntoken == '/'; ntoken++) ;
 
-        for (next_in = ntoken; *next_in != '/' 
+        for (next_in = ntoken; *next_in != '/'
                  && *next_in != '\0'; next_in++) ;
- 
+
         len = next_in - ntoken;
 
         if (len == 0) {
@@ -423,7 +423,7 @@ ccnet_expand_path (const char *src)
             break;
         }
 
-        if (len == 2 && ntoken[0] == '.' && ntoken[1] == '.') 
+        if (len == 2 && ntoken[0] == '.' && ntoken[1] == '.')
         {
             /* '..' */
             for (; next_out > new_path && *next_out != '/'; next_out--)
@@ -454,7 +454,7 @@ calculate_sha1 (unsigned char *sha1, const char *msg)
     SHA_CTX c;
 
     SHA1_Init(&c);
-    SHA1_Update(&c, msg, strlen(msg));    
+    SHA1_Update(&c, msg, strlen(msg));
 	SHA1_Final(sha1, &c);
     return 0;
 }
@@ -484,7 +484,7 @@ ccnet_sha1_equal (const void *v1,
     for (i = 0; i < 20; i++)
         if (p1[i] != p2[i])
             return 0;
-    
+
     return 1;
 }
 
@@ -559,14 +559,14 @@ char** strsplit_by_space (char *string, int *length)
     char *remainder, *s;
     int size = 8, num = 0, done = 0;
     char **array;
-    
+
     if (string == NULL || string[0] == '\0') {
         *length = 0;
         return NULL;
     }
 
     array = malloc (sizeof(char *) * size);
-    
+
     remainder = string;
     while (!done) {
         for (s = remainder; *s != ' ' && *s != '\0'; ++s) ;
@@ -584,7 +584,7 @@ char** strsplit_by_space (char *string, int *length)
 
         remainder = s + 1;
     }
-    
+
     *length = num;
     return array;
 }
@@ -594,14 +594,14 @@ char** strsplit_by_char (char *string, int *length, char c)
     char *remainder, *s;
     int size = 8, num = 0, done = 0;
     char **array;
-    
+
     if (string == NULL || string[0] == '\0') {
         *length = 0;
         return NULL;
     }
 
     array = malloc (sizeof(char *) * size);
-    
+
     remainder = string;
     while (!done) {
         for (s = remainder; *s != c && *s != '\0'; ++s) ;
@@ -619,7 +619,7 @@ char** strsplit_by_char (char *string, int *length, char c)
 
         remainder = s + 1;
     }
-    
+
     *length = num;
     return array;
 }
@@ -632,7 +632,7 @@ char* strjoin_n (const char *seperator, int argc, char **argv)
 
     if (argc == 0)
         return NULL;
-    
+
     buf = g_string_new (argv[0]);
     for (i = 1; i < argc; ++i) {
         g_string_append (buf, seperator);
@@ -654,7 +654,7 @@ gboolean is_ipaddr_valid (const char *ip)
 
     if (inet_pton(AF_INET6, ip, buf) == 1)
         return TRUE;
-    
+
     return FALSE;
 }
 
@@ -672,7 +672,7 @@ void parse_key_value_pairs (char *string, KeyValueFunc func, void *data)
 
         for (next = line; *next != '\n' && *next; ++next) ;
         *next = '\0';
-        
+
         for (space = line; space < next && *space != ' '; ++space) ;
         if (*space != ' ') {
             g_warning ("Bad key value format: %s\n", line);
@@ -681,7 +681,7 @@ void parse_key_value_pairs (char *string, KeyValueFunc func, void *data)
         *space = '\0';
         key = line;
         value = space + 1;
-        
+
         func (data, key, value);
 
         line = next + 1;
@@ -702,7 +702,7 @@ void parse_key_value_pairs2 (char *string, KeyValueFunc2 func, void *data)
 
         for (next = line; *next != '\n' && *next; ++next) ;
         *next = '\0';
-        
+
         for (space = line; space < next && *space != ' '; ++space) ;
         if (*space != ' ') {
             g_warning ("Bad key value format: %s\n", line);
@@ -711,7 +711,7 @@ void parse_key_value_pairs2 (char *string, KeyValueFunc2 func, void *data)
         *space = '\0';
         key = line;
         value = space + 1;
-        
+
         if (func(data, key, value) == FALSE)
             break;
 
@@ -722,7 +722,7 @@ void parse_key_value_pairs2 (char *string, KeyValueFunc2 func, void *data)
 /**
  * handle the empty string problem.
  */
-gchar* 
+gchar*
 ccnet_key_file_get_string (GKeyFile *keyf,
                            const char *category,
                            const char *key)
@@ -743,7 +743,7 @@ ccnet_key_file_get_string (GKeyFile *keyf,
 
 /**
  * string_list_is_exists:
- * @str_list: 
+ * @str_list:
  * @string: a C string or %NULL
  *
  * Check whether @string is in @str_list.
@@ -763,7 +763,7 @@ string_list_is_exists (GList *str_list, const char *string)
 
 /**
  * string_list_append:
- * @str_list: 
+ * @str_list:
  * @string: a C string (can't be %NULL
  *
  * Append @string to @str_list if it is in the list.
@@ -857,7 +857,7 @@ string_list_parse (const char *list_in_str, const char *seperator)
         list = g_list_prepend (list, g_strdup(*ptr));
     }
     list = g_list_reverse (list);
-    
+
     g_strfreev (array);
     return list;
 }
@@ -1153,7 +1153,7 @@ ccnet_encrypt_with_key (char **data_out,
 
     EVP_CIPHER_CTX ctx;
     int ret;
-    int blks;                   
+    int blks;
 
     /* Prepare CTX for encryption. */
     EVP_CIPHER_CTX_init (&ctx);
@@ -1170,13 +1170,13 @@ ccnet_encrypt_with_key (char **data_out,
     }
 
     /* Allocating output buffer. */
-    
+
     /*
       For EVP symmetric encryption, padding is always used __even if__
       data size is a multiple of block size, in which case the padding
       length is the block size. so we have the following:
     */
-    
+
     blks = (in_len / BLK_SIZE) + 1;
     *data_out = (char *) g_malloc(blks * BLK_SIZE);
     if (*data_out == NULL) {
@@ -1206,7 +1206,7 @@ ccnet_encrypt_with_key (char **data_out,
     if (ret == ENC_FAILURE || *out_len != (blks * BLK_SIZE)) {
         goto enc_error;
     }
-    
+
     EVP_CIPHER_CTX_cleanup (&ctx);
     return 0;
 
@@ -1216,7 +1216,7 @@ enc_error:
     if (*data_out != NULL)
         g_free (*data_out);
     *data_out = NULL;
-    return -1;   
+    return -1;
 }
 
 int
@@ -1373,9 +1373,9 @@ get_process_handle (const char *process_name_in)
         hProcess = OpenProcess (PROCESS_ALL_ACCESS, FALSE, aProcesses[i]);
         if (!hProcess)
             continue;
-            
+
         if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded)) {
-            GetModuleBaseName(hProcess, hMod, process_name, 
+            GetModuleBaseName(hProcess, hMod, process_name,
                               sizeof(process_name)/sizeof(char));
         }
 
@@ -1437,7 +1437,7 @@ win32_spawn_process (char *cmdline_in, char *working_directory)
     si.hStdInput = (HANDLE) _get_osfhandle(0);
     si.hStdOutput = (HANDLE) _get_osfhandle(1);
     si.hStdError = (HANDLE) _get_osfhandle(2);
-    
+
     memset(&pi, 0, sizeof(pi));
 
     success = CreateProcess(NULL, cmdline, NULL, NULL, TRUE, flags,
@@ -1542,6 +1542,29 @@ wchar_from_utf8 (const char *utf8)
     return wch;
 }
 
+/* Get the commandline arguments in unicode, then convert them to utf8  */
+char **
+get_argv_utf8 (int *argc)
+{
+    int i = 0;
+    char **argv = NULL;
+    const wchar_t *cmdline = NULL;
+    wchar_t **argv_w = NULL;
+
+    cmdline = GetCommandLineW();
+    argv_w = CommandLineToArgvW (cmdline, argc);
+    if (!argv_w) {
+        printf("failed to CommandLineToArgvW(), GLE=%u\n", GetLastError());
+        return NULL;
+    }
+
+    argv = (char **)malloc (sizeof(char*) * (*argc));
+    for (i = 0; i < *argc; i++) {
+        argv[i] = wchar_to_utf8 (argv_w[i]);
+    }
+
+    return argv;
+}
 #endif  /* ifdef WIN32 */
 
 #ifdef __linux__

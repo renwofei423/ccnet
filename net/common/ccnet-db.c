@@ -5,6 +5,11 @@
 #include <zdb.h>
 #include "ccnet-db.h"
 
+#ifdef WIN32
+#include <windows.h>
+#define sleep(n) Sleep(1000 * (n))
+#endif
+
 #define MAX_GET_CONNECTION_RETRIES 3
 
 struct CcnetDB {
@@ -70,7 +75,6 @@ ccnet_db_new_sqlite (const char *db_path)
 
     url = g_string_new ("");
     g_string_append_printf (url, "sqlite://%s", db_path);
-
     zdb_url = URL_new (url->str);
     db->pool = ConnectionPool_new (zdb_url);
     if (!db->pool) {

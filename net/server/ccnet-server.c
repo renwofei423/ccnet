@@ -15,6 +15,7 @@ char *pidfile = NULL;
 CcnetSession  *session;
 
 
+#ifndef WIN32
 struct event                sigint;
 struct event                sigterm;
 struct event                sigusr1;
@@ -40,6 +41,7 @@ static void setSigHandlers ()
     event_set(&sigusr1, SIGUSR1, EV_SIGNAL, sigintHandler, NULL);
 	event_add(&sigusr1, NULL);
 }
+#endif
 
 static void
 remove_pidfile (const char *pidfile)
@@ -133,7 +135,9 @@ main (int argc, char **argv)
 
     config_dir = DEFAULT_CONFIG_DIR;
 
-    
+#ifdef WIN32
+    argv = get_argv_utf8 (&argc);
+#endif
     while ((c = getopt_long (argc, argv, short_options, 
                              long_options, NULL)) != EOF) {
         switch (c) {
@@ -175,8 +179,15 @@ main (int argc, char **argv)
         exit (1);
     }
 
+#ifndef WIN32
+#ifndef __APPLE__
     if (daemon_mode)
         daemon (1, 0);
+#endif
+#else
+    WSADATA     wsadata;
+    WSAStartup(0x0101, &wsadata);
+#endif
 
     g_type_init ();
 
@@ -227,7 +238,9 @@ main (int argc, char **argv)
     }
     atexit (on_ccnet_exit);
 
+#ifndef WIN32
     setSigHandlers();
+#endif
 
     ccnet_session_start (session);
     ccnet_start_rpc(session);

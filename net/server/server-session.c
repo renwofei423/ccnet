@@ -112,7 +112,7 @@ static int init_sqlite_database (CcnetSession *session)
 {
     char *db_path;
 
-    db_path = g_build_filename (session->config_dir, CCNET_DB, NULL);
+    db_path = g_build_path ("/", session->config_dir, CCNET_DB, NULL);
     session->db = ccnet_db_new_sqlite (db_path);
     if (!session->db) {
         g_warning ("Failed to open database.\n");
