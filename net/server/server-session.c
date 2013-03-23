@@ -158,6 +158,43 @@ static int init_mysql_database (CcnetSession *session)
    return 0;
 }
 
+static int init_pgsql_database (CcnetSession *session)
+{
+    char *host, *user, *passwd, *db, *unix_socket;
+
+    host = ccnet_key_file_get_string (session->keyf, "Database", "HOST");
+    user = ccnet_key_file_get_string (session->keyf, "Database", "USER");
+    passwd = ccnet_key_file_get_string (session->keyf, "Database", "PASSWD");
+    db = ccnet_key_file_get_string (session->keyf, "Database", "DB");
+
+    if (!host) {
+        g_warning ("DB host not set in config.\n");
+        return -1;
+    }
+    if (!user) {
+        g_warning ("DB user not set in config.\n");
+        return -1;
+    }
+    if (!passwd) {
+        g_warning ("DB passwd not set in config.\n");
+        return -1;
+    }
+    if (!db) {
+        g_warning ("DB name not set in config.\n");
+        return -1;
+    }
+    unix_socket = ccnet_key_file_get_string (session->keyf,
+                                             "Database", "UNIX_SOCKET");
+
+    session->db = ccnet_db_new_pgsql (host, user, passwd, db, unix_socket);
+    if (!session->db) {
+        g_warning ("Failed to open database.\n");
+        return -1;
+    }
+
+   return 0;
+}
+
 static int
 load_database_config (CcnetSession *session)
 {
@@ -171,6 +208,9 @@ load_database_config (CcnetSession *session)
     } else if (strncasecmp (engine, DB_MYSQL, sizeof(DB_MYSQL)) == 0) {
         ccnet_debug ("Use database Mysql\n");
         ret = init_mysql_database (session);
+    } else if (strncasecmp (engine, DB_PGSQL, sizeof(DB_PGSQL)) == 0) {
+        ccnet_debug ("Use database PostgreSQL\n");
+        ret = init_pgsql_database (session);
     }
     return ret;
 }

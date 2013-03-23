@@ -389,6 +389,19 @@ static int check_db_table (CcnetDB *db)
         sql = "CREATE UNIQUE INDEX IF NOT EXISTS peer_index on Binding (peer_id)";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
+    } else if (db_type == CCNET_DB_TYPE_PGSQL) {
+        sql = "CREATE TABLE IF NOT EXISTS EmailUser ("
+            "id SERIAL PRIMARY KEY, "
+            "email VARCHAR(255), passwd CHAR(41), "
+            "is_staff BOOL NOT NULL, is_active BOOL NOT NULL, "
+            "ctime BIGINT, UNIQUE (email))";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+        sql = "CREATE TABLE IF NOT EXISTS Binding (email VARCHAR(255), peer_id CHAR(41),"
+            "UNIQUE (peer_id))";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+
     }
 
     return 0;
@@ -433,6 +446,7 @@ open_db (CcnetUserManager *manager)
         if (!db)
             return -1;
         break;
+    case CCNET_DB_TYPE_PGSQL:
     case CCNET_DB_TYPE_MYSQL:
         db = manager->session->db;
         break;

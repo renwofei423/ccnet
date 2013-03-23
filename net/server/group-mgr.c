@@ -74,6 +74,7 @@ open_db (CcnetGroupManager *manager)
         if (!db)
             return -1;
         break;
+    case CCNET_DB_TYPE_PGSQL:
     case CCNET_DB_TYPE_MYSQL:
         db = manager->session->db;
         break;
@@ -123,6 +124,19 @@ static int check_db_table (CcnetDB *db)
 
         sql = "CREATE INDEX IF NOT EXISTS username_indx on "
             "`GroupUser` (`user_name`)";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+    } else if (db_type == CCNET_DB_TYPE_PGSQL) {
+        sql = "CREATE TABLE IF NOT EXISTS \"Group\" (group_id SERIAL"
+            " PRIMARY KEY, group_name VARCHAR(255),"
+            " creator_name VARCHAR(255), timestamp BIGINT)";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+
+        sql = "CREATE TABLE IF NOT EXISTS GroupUser (group_id INTEGER,"
+            " user_name VARCHAR(255), is_staff tinyint, UNIQUE "
+            " (group_id, user_name))"
+            "ENGINE=INNODB";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
     }

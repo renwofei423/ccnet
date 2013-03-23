@@ -66,6 +66,8 @@ if test "$bwin32" = true; then
    compile_cli=no
    compile_tools=no
    compile_server=no
+   compile_mysql=no
+   compile_pgsql=no
 fi
 
 if test "$bmac" = true; then
@@ -73,10 +75,17 @@ if test "$bmac" = true; then
    compile_cli=no
    compile_tools=no
    compile_server=no
+   compile_mysql=no
+   compile_pgsql=no
 
    AC_ARG_ENABLE(server, AC_HELP_STRING([--enable-server], [enable server]),
    [compile_server=$enableval],[compile_server="no"])
 
+   AC_ARG_ENABLE(mysql, AC_HELP_STRING([--enable-mysql], [enable mysql]),
+      [compile_mysql=$enableval],[compile_mysql="no"])
+
+   AC_ARG_ENABLE(pgsql, AC_HELP_STRING([--enable-pgsql], [enable postgresql]),
+      [compile_pgsql=$enableval],[compile_pgsql="no"])
 fi
 
 if test "$blinux" = true; then
@@ -84,7 +93,8 @@ if test "$blinux" = true; then
    compile_tools=yes
 
    compile_server=no
-   
+   compile_mysql=no
+   compile_pgsql=no
 
    AC_ARG_ENABLE(client, AC_HELP_STRING([--enable-client], [enable server]),
       [compile_client=$enableval],[compile_client="yes"])
@@ -103,6 +113,12 @@ if test "$blinux" = true; then
    AC_ARG_ENABLE(cluster, AC_HELP_STRING([--enable-cluster],
       [enable cluster]), [compile_cluster=$enableval],
       [compile_cluster="no"])
+
+   AC_ARG_ENABLE(mysql, AC_HELP_STRING([--enable-mysql], [enable mysql]),
+      [compile_mysql=$enableval],[compile_mysql="no"])
+
+   AC_ARG_ENABLE(pgsql, AC_HELP_STRING([--enable-pgsql], [enable postgresql]),
+      [compile_pgsql=$enableval],[compile_pgsql="no"])
 fi
 
 AC_ARG_ENABLE(python,
@@ -159,6 +175,8 @@ AM_CONDITIONAL([COMPILE_CLIENT], [test "${compile_client}" = "yes"])
 AM_CONDITIONAL([COMPILE_SERVER], [test "${compile_server}" = "yes"])
 AM_CONDITIONAL([COMPILE_CLUSTER], [test "${compile_cluster}" = "yes"])
 AM_CONDITIONAL([COMPILE_DEMO], [test "${compile_demo}" = "yes"])
+AM_CONDITIONAL([COMPILE_MYSQL], [test "${compile_mysql}" = "yes"])
+AM_CONDITIONAL([COMPILE_PGSQL], [test "${compile_pgsql}" = "yes"])
 
 AM_CONDITIONAL([WIN32], [test "$bwin32" = "true"])
 AM_CONDITIONAL([MACOS], [test "$bmac" = "true"])
@@ -291,7 +309,29 @@ if test "${compile_server}" = "yes"; then
    PKG_CHECK_MODULES(ZDB, [zdb >= $ZDB_REQUIRED])
    AC_SUBST(ZDB_CFLAGS)
    AC_SUBST(ZDB_LIBS)
+fi
 
+# check postgresql if compile_pgsql is set
+if test "${compile_pgsql}" = "yes"; then
+  saved_CPPFLAGS=$CPPFLAGS
+  saved_LDFLAGS=$LDFLAGS
+  PGSQL_CFLAGS="-I`pg_config --includedir` $CPPFLAGS"
+  PGSQL_LIBS="-L`pg_config --libdir` $LDFLAGS"
+
+  CPPFLAGS="$PGSQL_CFLAGS $CPPFLAGS"
+  LDFLAGS="$PGSQL_LIBS $LDFLAGS"
+
+  AC_CHECK_HEADERS([libpq-fe.h], [], [compile_pgsql="no"])
+
+  CPPFLAGS=$saved_CPPFLAGS
+  LDFLAGS=$saved_LDFLAGS
+
+  AC_SUBST(PGSQL_LIBS)
+  AC_SUBST(PGSQL_CFLAGS)
+fi
+
+# check mysql if comiple_mysql is set
+if test "${compile_mysql}" = "yes"; then
    MYSQL_LIBS=`mysql_config --libs_r`
    MYSQL_CFLAGS=`mysql_config --include`
 
@@ -365,4 +405,11 @@ fi
 if test x${compile_demo} = xyes; then
    echo    "demo"
 fi
+if test x${compile_mysql} = xyes; then
+   echo     "mysql"
+fi
+if test x${compile_pgsql} = xyes; then
+   echo     "pgsql"
+fi
+
 echo

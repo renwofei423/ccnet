@@ -67,6 +67,7 @@ open_db (CcnetOrgManager *manager)
         if (!db)
             return -1;
         break;
+    case CCNET_DB_TYPE_PGSQL:
     case CCNET_DB_TYPE_MYSQL:
         db = manager->session->db;
         break;
@@ -151,6 +152,26 @@ static int check_db_table (CcnetDB *db)
             "OrgGroup (org_id, group_id)";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
+    } else if (db_type == CCNET_DB_TYPE_PGSQL) {
+        sql = "CREATE TABLE IF NOT EXISTS Organization (org_id SERIAL"
+            " PRIMARY KEY, org_name VARCHAR(255),"
+            " url_prefix VARCHAR(255), creator VARCHAR(255), ctime BIGINT,"
+            " UNIQUE (url_prefix))";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+        
+        sql = "CREATE TABLE IF NOT EXISTS OrgUser (org_id INTEGER, "
+            "email VARCHAR(255), is_staff BOOL NOT NULL, "
+            "INDEX (email), UNIQUE (org_id, email))";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+
+        sql = "CREATE TABLE IF NOT EXISTS OrgGroup (org_id INTEGER, "
+            "group_id INTEGER, INDEX (group_id), "
+            "UNIQUE (org_id, group_id))";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+        
     }
 
     return 0;

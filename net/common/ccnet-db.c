@@ -56,6 +56,45 @@ ccnet_db_new_mysql (const char *host,
 }
 
 CcnetDB *
+ccnet_db_new_pgsql (const char *host, 
+                    const char *user, 
+                    const char *passwd,
+                    const char *db_name,
+                    const char *unix_socket)
+{
+    CcnetDB *db;
+    GString *url;
+    URL_T zdb_url;
+
+    db = g_new0 (CcnetDB, 1);
+    if (!db) {
+        g_warning ("Failed to alloc db structure.\n");
+        return NULL;
+    }
+
+    url = g_string_new ("");
+    g_string_append_printf (url, "postgresql://%s:%s@%s/", user, passwd, host);
+    if (db_name)
+        g_string_append (url, db_name);
+    if (unix_socket)
+        g_string_append_printf (url, "?unix-socket=%s", unix_socket);
+
+    zdb_url = URL_new (url->str);
+    db->pool = ConnectionPool_new (zdb_url);
+    if (!db->pool) {
+        g_warning ("Failed to create db connection pool.\n");
+        g_string_free (url, TRUE);
+        g_free (db);
+        return NULL;
+    }
+
+    ConnectionPool_start (db->pool);
+    db->type = CCNET_DB_TYPE_PGSQL;
+
+    return db;
+}
+
+CcnetDB *
 ccnet_db_new_sqlite (const char *db_path)
 {
     CcnetDB *db;
