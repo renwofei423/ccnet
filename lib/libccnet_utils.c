@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include <string.h>
 #include <openssl/sha.h>

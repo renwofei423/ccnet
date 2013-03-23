@@ -315,14 +315,21 @@ if test "${compile_server}" = "yes"; then
 fi
 
 if test "${compile_ldap}" = "yes"; then
-   AC_CHECK_LIB(ldap, ldap_init, [have_ldap="yes"],
-      AC_MSG_ERROR([*** Unable to find ldap client library]), )
+   if test "$bwin32" != true; then
+      AC_CHECK_LIB(ldap, ldap_init, [have_ldap="yes"],
+         AC_MSG_ERROR([*** Unable to find ldap client library]), )
 
-   if test "${have_ldap}" = "yes"; then
-      echo "found ldap client library"
+      if test "${have_ldap}" = "yes"; then
+         echo "found ldap client library"
+         AC_DEFINE([HAVE_LDAP], [1], [Define if ldap library exists.])
+         AC_SUBST(LDAP_LIBS, "-lldap -llber")
+      fi
+   else
       AC_DEFINE([HAVE_LDAP], [1], [Define if ldap library exists.])
-      AC_SUBST(LDAP_LIBS, "-lldap -llber")
+      AC_SUBST(LDAP_LIBS, "-lWldap32")
    fi
+
+
 fi
 
 ac_configure_args="$ac_configure_args -q"

@@ -4,12 +4,16 @@
 #include "common.h"
 
 #include <stdio.h>
+#include <evdns.h>
+
 #include "utils.h"
 
 #include "session.h"
 #include "peer.h"
 #include "peer-mgr.h"
 #include "perm-mgr.h"
+
+#include "daemon-session.h"
 
 #include "log.h"
 

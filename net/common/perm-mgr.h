@@ -36,6 +36,11 @@ ccnet_perm_manager_check_permission (CcnetPermManager *mgr,
                                      int argc, char **argv);
 
 int
+ccnet_perm_manager_check_role_permission(CcnetPermManager *mgr,
+                                         const char *role,
+                                         const char *group);
+
+int
 ccnet_perm_manager_register_service (CcnetPermManager *mgr,
                                      const char *svc_name,
                                      const char *group,

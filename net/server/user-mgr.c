@@ -18,8 +18,12 @@
 #include <openssl/sha.h>
 
 #ifdef HAVE_LDAP
-#define LDAP_DEPRECATED 1
-#include <ldap.h>
+  #ifndef WIN32
+    #define LDAP_DEPRECATED 1
+    #include <ldap.h>
+  #else
+    #include <winldap.h>
+  #endif
 #endif
 
 #define DEBUG_FLAG  CCNET_DEBUG_PEER
@@ -145,11 +149,16 @@ static LDAP *ldap_init_and_bind (const char *host,
     int res;
     int desired_version = LDAP_VERSION3;
 
+#ifndef WIN32
     res = ldap_initialize (&ld, host);
     if (res != LDAP_SUCCESS) {
         ccnet_warning ("ldap_initialize failed: %s.\n", ldap_err2string(res));
         return NULL;
     }
+#else
+    ld = ldap_init (host, LDAP_PORT);
+#endif
+
 
     /* set the LDAP version to be 3 */
     res = ldap_set_option (ld, LDAP_OPT_PROTOCOL_VERSION, &desired_version);
